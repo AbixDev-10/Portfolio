@@ -172,6 +172,15 @@ export const projects = [
     image: socialMediaImage,
     liveDemo: "",
     github: "https://github.com/AbixDev-10/JSON_Refiner_Advanced_Edition.git"
+  },
+  {
+    title: "My Portfolio",
+    description:
+      "Designed and developed a personal portfolio website to showcase projects, skills, experience, and contact details with a clean responsive interface.",
+    techStack: ["React.js", "Tailwind CSS", "Vite", "Responsive Design"],
+    image: ecommerceImage,
+    liveDemo: "",
+    github: "https://github.com/AbixDev-10/My-Portfolio.git"
   }
 ];
 
