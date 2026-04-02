@@ -22,6 +22,7 @@ import {
 
 import busBookingImage from "../assets/bus-bookeing.png";
 import ecommerceImage from "../assets/ecommerce.svg";
+import portfolioBannerImage from "../assets/portfolio banner.jpg";
 import socialMediaImage from "../assets/social-media.svg";
 
 export const personalInfo = {
@@ -178,7 +179,7 @@ export const projects = [
     description:
       "Designed and developed a personal portfolio website to showcase projects, skills, experience, and contact details with a clean responsive interface.",
     techStack: ["React.js", "Tailwind CSS", "Vite", "Responsive Design"],
-    image: ecommerceImage,
+    image: portfolioBannerImage,
     liveDemo: "",
     github: "https://github.com/AbixDev-10/My-Portfolio.git"
   }

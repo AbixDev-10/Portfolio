@@ -43,13 +43,28 @@ Tailwind is already configured in this project with:
 npm install
 ```
 
-2. Start the development server:
+2. Create your mail env file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Update `.env` with your SMTP values. For Gmail, use an App Password in `SMTP_PASS`.
+
+3. Start frontend + backend together:
 
 ```bash
 npm start
 ```
 
-3. Create a production build:
+Alternative (two terminals):
+
+```bash
+npm run start:server
+npm run start:client
+```
+
+4. Create a production build:
 
 ```bash
 npm run build

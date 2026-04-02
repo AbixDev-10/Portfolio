@@ -5,11 +5,65 @@ import SectionShell from "./SectionShell";
 import { contactCards } from "../data/portfolioData";
 
 function Contact() {
-  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+  const [formStatus, setFormStatus] = useState({
+    type: "",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setFormSubmitted(true);
+    setFormStatus({ type: "", message: "" });
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to send message.");
+      }
+
+      setFormStatus({
+        type: "success",
+        message: "Message sent successfully. I will get back to you soon."
+      });
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: ""
+      });
+    } catch (error) {
+      setFormStatus({
+        type: "error",
+        message: error.message || "Something went wrong. Please try again."
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -59,20 +113,61 @@ function Contact() {
               onSubmit={handleSubmit}
             >
               <div className="grid gap-6">
-                <FormField id="name" label="Your Name" placeholder="" />
-                <FormField id="email" type="email" label="Your Email" placeholder="" />
-                <FormField id="subject" label="Subject" placeholder="" />
-                <FormField id="message" label="Message" as="textarea" rows="6" placeholder="" />
+                <FormField
+                  id="name"
+                  label="Your Name"
+                  placeholder=""
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                />
+                <FormField
+                  id="email"
+                  type="email"
+                  label="Your Email"
+                  placeholder=""
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                />
+                <FormField
+                  id="subject"
+                  label="Subject"
+                  placeholder=""
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                />
+                <FormField
+                  id="message"
+                  label="Message"
+                  as="textarea"
+                  rows="6"
+                  placeholder=""
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
+                />
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="inline-flex justify-center rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white transition duration-300 hover:-translate-y-1 hover:bg-rose-700"
                 >
-                  Send Message
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </button>
-                {formSubmitted ? (
-                  <p className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-medium leading-6 text-primary">
-                    Thanks for reaching out. Connect your mail service or backend endpoint to make
-                    this form fully functional.
+                {formStatus.message ? (
+                  <p
+                    className={`rounded-2xl px-4 py-3 text-sm font-medium leading-6 ${
+                      formStatus.type === "success"
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-rose-50 text-rose-700"
+                    }`}
+                  >
+                    {formStatus.message}
                   </p>
                 ) : null}
               </div>
