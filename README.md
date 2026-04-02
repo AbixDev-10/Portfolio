@@ -70,6 +70,20 @@ npm run start:client
 npm run build
 ```
 
+## Deploy To Vercel
+
+1. Push this project to GitHub.
+2. Import the repo in Vercel.
+3. In Vercel Project Settings -> Environment Variables, add:
+   - `SMTP_HOST`
+   - `SMTP_PORT`
+   - `SMTP_USER`
+   - `SMTP_PASS`
+   - `MAIL_TO`
+4. Deploy.
+
+Your contact form sends email from the serverless route at `/api/contact` in production.
+
 ## Customization
 
 - Replace `[Your Name]` in the hero and footer with your actual name.
