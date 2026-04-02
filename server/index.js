@@ -12,7 +12,11 @@ const smtpUser = readEnv("SMTP_USER");
 const smtpPass = readEnv("SMTP_PASS").replace(/\s+/g, "");
 const mailTo = readEnv("MAIL_TO");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*"
+  })
+);
 app.use(express.json());
 
 const requiredEnvVars = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "MAIL_TO"];
