@@ -1,42 +1,14 @@
 {
-  "name": "mern-portfolio",
+  "name": "portfolio-monorepo",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^16.6.1",
-    "express": "^5.2.1",
-    "nodemailer": "^7.0.13",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-icons": "^5.5.0",
-    "react-router-dom": "^6.30.1"
-  },
   "scripts": {
-    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
-    "start:client": "vite",
-    "start:server": "node server/index.js",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "concurrently \"npm run start --prefix backend\" \"npm run start --prefix frontend\"",
+    "start:frontend": "npm run start --prefix frontend",
+    "start:backend": "npm run start --prefix backend",
+    "build": "npm run build --prefix frontend"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.7.0",
-    "autoprefixer": "^10.4.21",
-    "concurrently": "^9.2.1",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.17",
-    "vite": "^7.1.7"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "concurrently": "^9.2.1"
   }
 }
