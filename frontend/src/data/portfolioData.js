@@ -180,7 +180,7 @@ export const projects = [
       "Designed and developed a personal portfolio website to showcase projects, skills, experience, and contact details with a clean responsive interface.",
     techStack: ["React.js", "Tailwind CSS", "Vite", "Responsive Design"],
     image: portfolioBannerImage,
-    liveDemo: "",
+    liveDemo: "https://portfolio-sepia-one-58.vercel.app",
     github: "https://github.com/AbixDev-10/My-Portfolio.git"
   }
 ];
