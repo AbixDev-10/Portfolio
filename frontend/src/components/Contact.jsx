@@ -5,6 +5,7 @@ import SectionShell from "./SectionShell";
 import { contactCards } from "../data/portfolioData";
 
 function Contact() {
+  const apiBaseUrl = (import.meta.env.VITE_API_URL || "").trim().replace(/\/$/, "");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -32,7 +33,7 @@ function Contact() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch(`${apiBaseUrl}/api/contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
