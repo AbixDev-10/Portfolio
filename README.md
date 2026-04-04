@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MERN Developer Portfolio
 
 A modern, responsive personal portfolio website for a MERN Stack Developer built with React.js and Tailwind CSS.
@@ -90,3 +91,6 @@ Your contact form sends email from the serverless route at `/api/contact` in pro
 - Update the social/profile links in `src/data/portfolioData.js`.
 - Replace `public/resume.pdf` with your real resume PDF.
 - Swap the demo and GitHub URLs for your live projects.
+=======
+# My-Portfolio
+>>>>>>> f1b9e2c8c866acfda63d8fb8e870f64dac74f7e7
