@@ -1,14 +1,25 @@
 {
   "name": "portfolio-backend",
   "version": "1.0.0",
+  "description": "Backend API for MERN Portfolio (Contact form with email and MongoDB)",
+  "main": "server/index.js",
   "private": true,
   "scripts": {
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^16.6.1",
-    "express": "^5.2.1",
-    "nodemailer": "^7.0.13"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.1",
+    "nodemailer": "^6.9.13"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
   }
 }

@@ -6,6 +6,7 @@ import { contactCards } from "../data/portfolioData";
 
 function Contact() {
   const apiBaseUrl = (import.meta.env.VITE_API_URL || "").trim().replace(/\/$/, "");
+  const contactEndpoint = apiBaseUrl ? `${apiBaseUrl}/api/contact` : "/api/contact";
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,15 +34,17 @@ function Contact() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/contact`, {
+      const response = await fetch(contactEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify(formData)
       });
-
-      const result = await response.json();
+      const contentType = response.headers.get("content-type") || "";
+      const result = contentType.includes("application/json")
+        ? await response.json()
+        : { message: "Server returned an unexpected response." };
 
       if (!response.ok) {
         throw new Error(result.message || "Failed to send message.");

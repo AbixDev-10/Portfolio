@@ -1,43 +1,108 @@
 const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
+const mongoose = require("mongoose");
 require("dotenv").config();
 
 const app = express();
-const readEnv = (key) => (process.env[key] || "").trim().replace(/^['"]|['"]$/g, "");
+
+const readEnv = (key) =>
+  (process.env[key] || "")
+    .trim()
+    .replace(/^['"]|['"]$/g, "");
+
 const port = Number(readEnv("PORT")) || 5000;
 const smtpHost = readEnv("SMTP_HOST");
-const smtpPort = Number(readEnv("SMTP_PORT") || 587);
+const smtpPort = Number(readEnv("SMTP_PORT")) || 587;
 const smtpUser = readEnv("SMTP_USER");
 const smtpPass = readEnv("SMTP_PASS").replace(/\s+/g, "");
 const mailTo = readEnv("MAIL_TO");
+const mongoURI = readEnv("MONGODB_URI");
+
+let mongoConnected = false;
+
+const buildMongoFallbackUri = (uri) => {
+  if (!uri.startsWith("mongodb+srv://")) {
+    return null;
+  }
+
+  const directBase =
+    "mongodb://portfolioUser:AbiportfolioUser@" +
+    [
+      "ac-vv4x2ru-shard-00-00.4gg8e09.mongodb.net:27017",
+      "ac-vv4x2ru-shard-00-01.4gg8e09.mongodb.net:27017",
+      "ac-vv4x2ru-shard-00-02.4gg8e09.mongodb.net:27017"
+    ].join(",");
+
+  return (
+    `${directBase}/portfolioDB` +
+    "?ssl=true&authSource=admin&replicaSet=atlas-ve2xiz-shard-0&retryWrites=true&w=majority"
+  );
+};
+
+const connectToMongo = async () => {
+  if (!mongoURI) {
+    console.warn("MONGODB_URI is not set. Continuing without database connectivity.");
+    return;
+  }
+
+  try {
+    await mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 5000
+    });
+    mongoConnected = true;
+    console.log("MongoDB connected");
+  } catch (err) {
+    const fallbackUri = buildMongoFallbackUri(mongoURI);
+    const isSrvLookupIssue =
+      mongoURI.startsWith("mongodb+srv://") &&
+      (err.message.includes("querySrv") || err.message.includes("ECONNREFUSED"));
+
+    if (!fallbackUri || !isSrvLookupIssue) {
+      mongoConnected = false;
+      console.error("MongoDB connection error:", err.message);
+      console.error("Continuing without database connectivity.");
+      return;
+    }
+
+    try {
+      await mongoose.connect(fallbackUri, {
+        serverSelectionTimeoutMS: 10000
+      });
+      mongoConnected = true;
+      console.log("MongoDB connected using direct Atlas hosts");
+    } catch (fallbackErr) {
+      mongoConnected = false;
+      console.error("MongoDB SRV connection error:", err.message);
+      console.error("MongoDB direct connection error:", fallbackErr.message);
+      console.error("Continuing without database connectivity.");
+    }
+  }
+};
 
 app.use(
   cors({
-    origin: "*"
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://your-portfolio.vercel.app"
+    ],
+    credentials: true
   })
 );
 app.use(express.json());
 
-const requiredEnvVars = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "MAIL_TO"];
-const missingEnvVars = requiredEnvVars.filter((key) => !readEnv(key));
-
-if (missingEnvVars.length > 0) {
-  console.warn(`Missing environment variables: ${missingEnvVars.join(", ")}`);
-}
-
-const transporter = nodemailer.createTransport({
-  host: smtpHost,
-  port: smtpPort,
-  secure: smtpPort === 465,
-  auth: {
-    user: smtpUser,
-    pass: smtpPass
-  }
-});
+// Keep the API available even if MongoDB is temporarily unreachable.
+connectToMongo();
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true });
+  res.json({
+    ok: true,
+    message: "Server is running",
+    services: {
+      database: mongoConnected ? "connected" : "disconnected"
+    }
+  });
 });
 
 app.post("/api/contact", async (req, res) => {
@@ -50,7 +115,32 @@ app.post("/api/contact", async (req, res) => {
     });
   }
 
+  const missingMailEnv = [
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "MAIL_TO"
+  ].filter((key) => !readEnv(key));
+
+  if (missingMailEnv.length > 0) {
+    return res.status(500).json({
+      success: false,
+      message: `Missing server email config: ${missingMailEnv.join(", ")}`
+    });
+  }
+
   try {
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass
+      }
+    });
+
     await transporter.sendMail({
       from: `"Portfolio Contact Form" <${smtpUser}>`,
       to: mailTo,
@@ -72,40 +162,23 @@ app.post("/api/contact", async (req, res) => {
       message: "Message sent successfully."
     });
   } catch (error) {
-    console.error("Email send failed:", {
-      code: error.code,
-      responseCode: error.responseCode,
-      command: error.command,
-      response: error.response
-    });
+    console.error("Email send failed:", error);
 
     const isAuthError =
       error.code === "EAUTH" ||
       error.responseCode === 535 ||
-      (typeof error.response === "string" && error.response.includes("BadCredentials"));
+      (typeof error.response === "string" &&
+        error.response.includes("BadCredentials"));
 
     return res.status(500).json({
       success: false,
       message: isAuthError
-        ? "SMTP authentication failed. Check SMTP_USER and SMTP_PASS (for Gmail, use a 16-character App Password)."
+        ? "SMTP authentication failed. Check SMTP_USER and SMTP_PASS (use Gmail App Password)."
         : "Unable to send message right now. Please try again later."
     });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Mail server running on http://localhost:${port}`);
-  transporter
-    .verify()
-    .then(() => {
-      console.log("SMTP connection verified.");
-    })
-    .catch((error) => {
-      console.error("SMTP verify failed:", {
-        code: error.code,
-        responseCode: error.responseCode,
-        command: error.command,
-        response: error.response
-      });
-    });
+  console.log(`Server running on port ${port}`);
 });
