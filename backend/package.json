@@ -5,7 +5,7 @@
   "main": "server/index.js",
   "private": true,
   "scripts": {
-    "start": "npm run dev",
+    "start": "node server/index.js",
     "dev": "nodemon server/index.js",
     "test": "echo \"No tests specified\" && exit 0"
   },
